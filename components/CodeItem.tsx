@@ -1,0 +1,98 @@
+import { useState } from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
+import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
+import { AuthCode } from './screens/AuthCodes';
+
+type CodeProps = {
+  code: AuthCode;
+};
+
+type TotpResponseBody =
+  | { errors: { message: string }[] }
+  | { password: number };
+
+let currentDate: number;
+
+export default function CodeItem(props: CodeProps) {
+  const [password, setPassword] = useState<number>();
+  const [errors, setErrors] = useState<{ message: string }[]>();
+  const [showCode, setShowCode] = useState<boolean>(false);
+  const [countdownDuration, setCountdownDuration] = useState<number>();
+  const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
+
+  console.log(password, showCode, countdownDuration);
+
+  const setCurrentDate = () => {
+    currentDate = Math.floor(Date.now() / 1000);
+  };
+
+  const getPassword = async () => {
+    setCurrentDate();
+
+    const totpResponse = await fetch('https://sastro-password.herokuapp.com/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        twoFaSecret: props.code.seed,
+        twoFaUnixT0: props.code.twoFaUnixT0,
+        currentTimeInUnix: currentDate,
+        applicationPassword: 'KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZ',
+      }),
+    });
+
+    const totpResponseBody = (await totpResponse.json()) as TotpResponseBody;
+
+    if ('password' in totpResponseBody) {
+      setPassword(totpResponseBody.password);
+      setCountdownDuration(
+        (Math.floor((currentDate - props.code.twoFaUnixT0) / 30) + 1) * 30 -
+          (currentDate - props.code.twoFaUnixT0) +
+          1,
+      );
+      setRefreshCountdown(refreshCountdown + 1);
+    }
+
+    if ('errors' in totpResponseBody) {
+      setErrors(totpResponseBody.errors);
+    }
+  };
+
+  if (!password) {
+    getPassword();
+  }
+
+  if (password && countdownDuration) {
+    return (
+      <View>
+        {showCode ? (
+          <>
+            <Text>Code: {password}</Text>
+          </>
+        ) : (
+          <Button title="Show Code" onPress={() => setShowCode(true)}></Button>
+        )}
+        <Text>{props.code.name}</Text>
+        <CountdownCircleTimer
+          key={refreshCountdown}
+          isPlaying
+          duration={30}
+          initialRemainingTime={countdownDuration}
+          colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+          colorsTime={[7, 5, 2, 0]}
+          size={70}
+          onComplete={() => {
+            getPassword();
+          }}
+        >
+          {({ remainingTime }) => <Text>{remainingTime}</Text>}
+        </CountdownCircleTimer>
+      </View>
+    );
+  }
+
+  return null;
+}
+
+const styles = StyleSheet.create({});
