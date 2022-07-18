@@ -67,7 +67,7 @@ export default function QrCodeScanner(props: QrScannerProps) {
           <>
             <BarCodeScanner
               onBarCodeScanned={scanned ? undefined : handleQrCodeScanned}
-              style={{ height: 400, width: 400 }}
+              style={{ height: 654, width: 368 }}
             />
           </>
         ) : (

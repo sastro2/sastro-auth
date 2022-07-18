@@ -21,7 +21,7 @@ export type AuthCode = {
 export default function AuthCodes(props: AuthCodesProps) {
   const [codes, setCodes] = useState<AuthCode[]>([]);
 
-  const renderItem = (codeObject) => {
+  const renderItem = (codeObject: any) => {
     const code = codeObject.item;
 
     return <CodeItem code={code} />;

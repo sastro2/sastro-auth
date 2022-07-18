@@ -65,29 +65,44 @@ export default function CodeItem(props: CodeProps) {
 
   if (password && countdownDuration) {
     return (
-      <View>
+      <View style={{ marginBottom: '5%', height: 80 }}>
         {showCode ? (
-          <>
-            <Text>Code: {password}</Text>
-          </>
+          <View>
+            <Text>{props.code.name}</Text>
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Text style={{ fontSize: 50 }}>{password}</Text>
+              <CountdownCircleTimer
+                key={refreshCountdown}
+                isPlaying
+                duration={30}
+                initialRemainingTime={countdownDuration}
+                colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+                colorsTime={[7, 5, 2, 0]}
+                size={60}
+                onComplete={() => {
+                  getPassword();
+                }}
+              >
+                {({ remainingTime }) => <Text>{remainingTime}</Text>}
+              </CountdownCircleTimer>
+            </View>
+          </View>
         ) : (
-          <Button title="Show Code" onPress={() => setShowCode(true)}></Button>
+          <View>
+            <Text>{props.code.name}</Text>
+            <Button
+              title="Show Code"
+              onPress={() => setShowCode(true)}
+            ></Button>
+          </View>
         )}
-        <Text>{props.code.name}</Text>
-        <CountdownCircleTimer
-          key={refreshCountdown}
-          isPlaying
-          duration={30}
-          initialRemainingTime={countdownDuration}
-          colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-          colorsTime={[7, 5, 2, 0]}
-          size={70}
-          onComplete={() => {
-            getPassword();
-          }}
-        >
-          {({ remainingTime }) => <Text>{remainingTime}</Text>}
-        </CountdownCircleTimer>
       </View>
     );
   }
